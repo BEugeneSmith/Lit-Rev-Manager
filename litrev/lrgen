@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+#File: lrgen.pl
+#Created: Sat Dec 27 01:39:17 2014
+#Author: B. Eugene Smith
+use v5.18.2;
+use strict;
+use warnings;
+use Getopt::Long;
+
+my $version = 0.1;
+
+if ( ! @ARGV ) {
+    say "\n\tlrgen v$version\n\tuse 'lrstore -h' for help\t\n";
+    exit;
+}
+
+
+
+GetOptions(
+    "help|h"   => \&helper,
+    "file|f=s" => \my $file
+);
+
+if ( ! $file ) { exit }
+
+my $time = localtime;
+my $template = "
+{
+\"FILE\":\"~/Dropbox/lit_reviews/$file.json\",
+\"CREATED\":\"$time\",
+\"TITLE\":\"FILL\",
+\"YEAR\":\"FILL\",
+\"AUTHORS\":\"FILL\",
+\"SUMMARY\":\"FILL\",
+\"NOTES\":\"FILL\",
+\"COMMENTS\":\"FILL\"
+}
+";
+
+review_maker( $template );
+
+
+#SUBROUTINES
+sub helper {    
+    say "\t$!" if $!;
+    die "\tUsage: -f [file]\n\n";
+    exit;
+}
+
+sub review_maker {
+    my $draft = shift;
+    my $user = getlogin;
+    my $path = "/home/$user/Dropbox/lit_reviews/$file.json";
+    
+    die "$path exists. try another name.\n" if ( -e $path );
+
+    open my $OUT, ">", $path or die "$!\n";
+    print $OUT $draft;
+    close $OUT;
+}
